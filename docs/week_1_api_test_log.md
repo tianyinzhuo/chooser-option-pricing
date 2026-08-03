@@ -1,78 +1,39 @@
-\# Week 1 API Test Log
+# Week 1 API Test Log
 
-
-
-\## Test Date
-
-
+## Test Date
 
 2026-08-03
 
+## Yahoo Finance
 
+- Tool: `yfinance` and Yahoo Finance chart endpoint
+- Instruments tested: JPM and VIX
+- Result: Unavailable in the local network environment
+- Issue: The Yahoo Finance chart endpoint returned `HTTP 000`.
+- Decision: Not used in the current data pipeline.
 
-\## Yahoo Finance
+## Alpha Vantage
 
+- Endpoint tested: `TIME_SERIES_DAILY`
+- Instrument: JPM
+- Network status: Reachable after invalid proxy settings were removed.
+- API result: The free account returned an API information/limit response.
+- Decision: API key remains stored only in `.env`; this source is not used
+  in the current data pipeline.
 
+## FRED
 
-\- Tool: `yfinance`
+- Series tested: `VIXCLS` and `DGS10`
+- Result: Successful
+- Output:
+  - `vix_daily_2018_2024.csv`
+  - `treasury_10y_daily_2018_2024.csv`
 
-\- Instruments tested: JPM and ^VIX
+## Twelve Data
 
-\- Result: Failed
-
-\- Issue: Yahoo Finance data endpoints timed out in the local network environment.
-
-\- Decision: Not used for the project data pipeline.
-
-
-
-\## Alpha Vantage
-
-
-
-\- Endpoint tested: `TIME\_SERIES\_DAILY`
-
-\- Instrument: JPM
-
-\- Result: Network unavailable
-
-\- Issue: Local DNS could not resolve `www.alphavantage.co`.
-
-\- Decision: API key configuration is retained in `.env`; the source is not used
-
-&#x20; in the current pipeline.
-
-
-
-\## FRED
-
-
-
-\- Series tested: `VIXCLS`, `DGS10`
-
-\- Result: Successful
-
-\- Output:
-
-&#x20; - `vix\_daily\_2018\_2024.csv`
-
-&#x20; - `treasury\_10y\_daily\_2018\_2024.csv`
-
-
-
-\## Twelve Data
-
-
-
-\- Endpoint tested: `time\_series`
-
-\- Instrument: JPM
-
-\- Result: Successful
-
-\- Output: `jpm\_daily\_2018\_2024.csv`
-
-\- Coverage: 2018-01-02 to 2024-12-31, 1,761 trading-day observations.
-
-\- Decision: Used as the JPM daily OHLCV source for the project.
-
+- Endpoint tested: `time_series`
+- Instrument: JPM
+- Result: Successful
+- Output: `jpm_daily_2018_2024.csv`
+- Coverage: 2018-01-02 to 2024-12-31, 1,761 trading-day observations.
+- Decision: Used as the JPM daily OHLCV source for the project.
