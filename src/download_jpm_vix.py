@@ -2,6 +2,7 @@ from pathlib import Path
 import json
 import os
 import subprocess
+import shutil
 from urllib.parse import urlencode
 
 import pandas as pd
@@ -9,6 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+CURL_BINARY = "CURL_BINARY," if shutil.which("curl.exe") else "curl"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
