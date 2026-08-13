@@ -1,110 +1,91 @@
-﻿from pathlib import Path
+from pathlib import Path
 import json
 import os
-import subprocess
-import shutil
 from urllib.parse import urlencode
+from urllib.request import urlopen
 
 import pandas as pd
 from dotenv import load_dotenv
 
-load_dotenv()
-
-CURL_BINARY = "curl.exe" if shutil.which("curl.exe") else "curl"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 START_DATE = "2018-01-01"
 END_DATE = "2024-12-31"
+JPM_END_DATE = "2025-01-01"
+
+load_dotenv(PROJECT_ROOT / ".env")
 
 api_key = os.getenv("TWELVE_DATA_API_KEY")
 if not api_key:
-    raise ValueError("鏈壘鍒?TWELVE_DATA_API_KEY锛岃妫€鏌?.env 鏂囦欢銆?)
-
-
-def download_file(url, output_path):
-    """涓嬭浇鍏紑 CSV 鏂囦欢銆?""
-    subprocess.run(
-        [
-            CURL_BINARY, "-L", "--fail", "--silent", "--show-error",
-            "--max-time", "60", url, "-o", str(output_path),
-        ],
-        check=True,
+    raise ValueError(
+        "TWELVE_DATA_API_KEY is missing. Check your .env file or GitHub secret."
     )
 
 
-def get_json(url):
-    """涓嬭浇骞惰В鏋?JSON 鏁版嵁銆?""
-    result = subprocess.run(
-        [
-            CURL_BINARY, "-L", "--fail", "--silent", "--show-error",
-            "--max-time", "60", url,
-        ],
-        capture_output=True,
-        text=True,
-        check=True,
+def fetch_json(url: str) -> dict:
+    """Fetch and parse a JSON response without relying on system curl."""
+    with urlopen(url, timeout=60) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def fetch_fred_series(series_id: str) -> pd.DataFrame:
+    """Download an unmodified FRED daily series and limit it to the project period."""
+    url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
+    data = pd.read_csv(url, parse_dates=["observation_date"])
+
+    return data[
+        (data["observation_date"] >= START_DATE)
+        & (data["observation_date"] <= END_DATE)
+    ]
+
+
+def collect_jpm() -> pd.DataFrame:
+    """Download raw JPM daily OHLCV data from Twelve Data."""
+    params = {
+        "symbol": "JPM",
+        "interval": "1day",
+        "start_date": START_DATE,
+        "end_date": JPM_END_DATE,
+        "adjust": "none",
+        "apikey": api_key,
+    }
+
+    url = "https://api.twelvedata.com/time_series?" + urlencode(params)
+    response = fetch_json(url)
+
+    if response.get("status") == "error" or "values" not in response:
+        message = response.get("message", "Unknown Twelve Data response.")
+        raise RuntimeError(f"Twelve Data request failed: {message}")
+
+    data = pd.DataFrame(response["values"])
+    data = data.rename(columns={"datetime": "date"})
+
+    for column in ["open", "high", "low", "close", "volume"]:
+        data[column] = pd.to_numeric(data[column], errors="coerce")
+
+    data["date"] = pd.to_datetime(data["date"])
+    return data.sort_values("date")
+
+
+def main() -> None:
+    jpm = collect_jpm()
+    vix = fetch_fred_series("VIXCLS")
+    treasury = fetch_fred_series("DGS10")
+
+    jpm.to_csv(RAW_DATA_DIR / "jpm_daily_2018_2024.csv", index=False)
+    vix.to_csv(RAW_DATA_DIR / "vix_daily_2018_2024.csv", index=False)
+    treasury.to_csv(
+        RAW_DATA_DIR / "treasury_10y_daily_2018_2024.csv",
+        index=False,
     )
-    return json.loads(result.stdout)
+
+    print(f"JPM rows: {len(jpm)}")
+    print(f"VIX rows: {len(vix)}")
+    print(f"Treasury rows: {len(treasury)}")
+    print(f"Raw data saved to: {RAW_DATA_DIR}")
 
 
-# 1. JPM 姣忔棩 OHLCV锛歍welve Data
-jpm_params = {
-    "symbol": "JPM",
-    "interval": "1day",
-    "start_date": START_DATE,
-    "end_date": "2025-01-01",
-    "adjust": "none",
-    "apikey": api_key,
-}
-jpm_url = "https://api.twelvedata.com/time_series?" + urlencode(jpm_params)
-jpm_json = get_json(jpm_url)
-
-if jpm_json.get("status") == "error":
-    raise RuntimeError(jpm_json.get("message", "Twelve Data API 杩斿洖閿欒銆?))
-
-jpm = pd.DataFrame(jpm_json["values"])
-jpm = jpm.rename(columns={"datetime": "date"})
-
-for column in ["open", "high", "low", "close", "volume"]:
-    jpm[column] = pd.to_numeric(jpm[column], errors="coerce")
-
-jpm["date"] = pd.to_datetime(jpm["date"])
-jpm = jpm.sort_values("date")
-jpm.to_csv(RAW_DATA_DIR / "jpm_daily_2018_2024.csv", index=False)
-
-# 2. VIX锛欶RED
-vix_raw_path = RAW_DATA_DIR / "_vix_fred_full_history.csv"
-download_file(
-    "https://fred.stlouisfed.org/graph/fredgraph.csv?id=VIXCLS",
-    vix_raw_path,
-)
-vix = pd.read_csv(vix_raw_path, parse_dates=["observation_date"])
-vix = vix[
-    (vix["observation_date"] >= START_DATE)
-    & (vix["observation_date"] <= END_DATE)
-]
-vix.to_csv(RAW_DATA_DIR / "vix_daily_2018_2024.csv", index=False)
-vix_raw_path.unlink()
-
-# 3. 10 骞存湡缇庡浗鍥藉€哄埄鐜囷細FRED
-treasury_raw_path = RAW_DATA_DIR / "_treasury_10y_fred_full_history.csv"
-download_file(
-    "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10",
-    treasury_raw_path,
-)
-treasury = pd.read_csv(treasury_raw_path, parse_dates=["observation_date"])
-treasury = treasury[
-    (treasury["observation_date"] >= START_DATE)
-    & (treasury["observation_date"] <= END_DATE)
-]
-treasury.to_csv(
-    RAW_DATA_DIR / "treasury_10y_daily_2018_2024.csv",
-    index=False,
-)
-treasury_raw_path.unlink()
-
-print(f"JPM: {len(jpm)} 琛?)
-print(f"VIX: {len(vix)} 琛?)
-print(f"10骞存湡缇庡浗鍥藉€哄埄鐜? {len(treasury)} 琛?)
-print(f"宸蹭繚瀛樿嚦锛歿RAW_DATA_DIR}")
+if __name__ == "__main__":
+    main()
