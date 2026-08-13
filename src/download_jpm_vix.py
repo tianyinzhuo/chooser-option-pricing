@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import json
 import os
 import subprocess
@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-CURL_BINARY = "CURL_BINARY," if shutil.which("curl.exe") else "curl"
+CURL_BINARY = "curl.exe" if shutil.which("curl.exe") else "curl"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -20,14 +20,14 @@ END_DATE = "2024-12-31"
 
 api_key = os.getenv("TWELVE_DATA_API_KEY")
 if not api_key:
-    raise ValueError("未找到 TWELVE_DATA_API_KEY，请检查 .env 文件。")
+    raise ValueError("鏈壘鍒?TWELVE_DATA_API_KEY锛岃妫€鏌?.env 鏂囦欢銆?)
 
 
 def download_file(url, output_path):
-    """下载公开 CSV 文件。"""
+    """涓嬭浇鍏紑 CSV 鏂囦欢銆?""
     subprocess.run(
         [
-            "curl.exe", "-L", "--fail", "--silent", "--show-error",
+            CURL_BINARY, "-L", "--fail", "--silent", "--show-error",
             "--max-time", "60", url, "-o", str(output_path),
         ],
         check=True,
@@ -35,10 +35,10 @@ def download_file(url, output_path):
 
 
 def get_json(url):
-    """下载并解析 JSON 数据。"""
+    """涓嬭浇骞惰В鏋?JSON 鏁版嵁銆?""
     result = subprocess.run(
         [
-            "curl.exe", "-L", "--fail", "--silent", "--show-error",
+            CURL_BINARY, "-L", "--fail", "--silent", "--show-error",
             "--max-time", "60", url,
         ],
         capture_output=True,
@@ -48,7 +48,7 @@ def get_json(url):
     return json.loads(result.stdout)
 
 
-# 1. JPM 每日 OHLCV：Twelve Data
+# 1. JPM 姣忔棩 OHLCV锛歍welve Data
 jpm_params = {
     "symbol": "JPM",
     "interval": "1day",
@@ -61,7 +61,7 @@ jpm_url = "https://api.twelvedata.com/time_series?" + urlencode(jpm_params)
 jpm_json = get_json(jpm_url)
 
 if jpm_json.get("status") == "error":
-    raise RuntimeError(jpm_json.get("message", "Twelve Data API 返回错误。"))
+    raise RuntimeError(jpm_json.get("message", "Twelve Data API 杩斿洖閿欒銆?))
 
 jpm = pd.DataFrame(jpm_json["values"])
 jpm = jpm.rename(columns={"datetime": "date"})
@@ -73,7 +73,7 @@ jpm["date"] = pd.to_datetime(jpm["date"])
 jpm = jpm.sort_values("date")
 jpm.to_csv(RAW_DATA_DIR / "jpm_daily_2018_2024.csv", index=False)
 
-# 2. VIX：FRED
+# 2. VIX锛欶RED
 vix_raw_path = RAW_DATA_DIR / "_vix_fred_full_history.csv"
 download_file(
     "https://fred.stlouisfed.org/graph/fredgraph.csv?id=VIXCLS",
@@ -87,7 +87,7 @@ vix = vix[
 vix.to_csv(RAW_DATA_DIR / "vix_daily_2018_2024.csv", index=False)
 vix_raw_path.unlink()
 
-# 3. 10 年期美国国债利率：FRED
+# 3. 10 骞存湡缇庡浗鍥藉€哄埄鐜囷細FRED
 treasury_raw_path = RAW_DATA_DIR / "_treasury_10y_fred_full_history.csv"
 download_file(
     "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10",
@@ -104,7 +104,7 @@ treasury.to_csv(
 )
 treasury_raw_path.unlink()
 
-print(f"JPM: {len(jpm)} 行")
-print(f"VIX: {len(vix)} 行")
-print(f"10年期美国国债利率: {len(treasury)} 行")
-print(f"已保存至：{RAW_DATA_DIR}")
+print(f"JPM: {len(jpm)} 琛?)
+print(f"VIX: {len(vix)} 琛?)
+print(f"10骞存湡缇庡浗鍥藉€哄埄鐜? {len(treasury)} 琛?)
+print(f"宸蹭繚瀛樿嚦锛歿RAW_DATA_DIR}")
