@@ -1,4 +1,5 @@
 pandas>=2.0
 numpy>=1.24
 pyarrow>=14.0
-python-dotenv>=1.0
+python-dotenv>=1.0jupyter>=1.0
+ipykernel>=6.0

@@ -1,0 +1,35 @@
+{
+  "model_name": "simple_chooser_bsm",
+  "currency": "USD",
+  "day_count_basis": 252,
+
+  "paper_baseline": {
+    "description": "Initial at-the-money replication case. K=150 and T2=1 year follow the Week 3 task requirement.",
+    "spot_price": 150.0,
+    "strike": 150.0,
+    "choice_time_years": 0.5,
+    "maturity_years": 1.0,
+    "risk_free_rate": 0.05,
+    "volatility": 0.30,
+    "dividend_yield": 0.0
+  },
+
+  "data_driven_case": {
+    "description": "JPM case based on the final available Week 2 observation.",
+    "pricing_date": "2024-12-31",
+    "spot_price": 239.71001,
+    "strike": 150.0,
+    "choice_time_years": 0.5,
+    "maturity_years": 1.0,
+    "risk_free_rate": 0.0458,
+    "volatility": 0.307555,
+    "dividend_yield": 0.0
+  },
+
+  "assumptions": [
+    "This is a European simple chooser option.",
+    "The choice date must satisfy 0 < T1 < T2.",
+    "T1=0.5 is an explicit initial assumption because the task brief specifies T2=1 but does not specify T1.",
+    "The original BSM baseline assumes constant volatility and zero dividend yield."
+  ]
+}
