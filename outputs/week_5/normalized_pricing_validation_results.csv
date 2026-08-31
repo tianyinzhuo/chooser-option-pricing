@@ -1,0 +1,4 @@
+﻿model_name,mae,rmse
+normalized_gbdt_balanced,0.8100296497628284,0.9543230495080799
+normalized_gbdt_conservative,0.8620168010417969,1.0031824193796397
+bsm_closed_form_baseline,2.308249353663723,2.8666130715047418

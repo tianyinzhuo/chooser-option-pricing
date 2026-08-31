@@ -1,0 +1,3 @@
+﻿model_name,mae,rmse
+bsm_closed_form_baseline,3.65814449772991,4.91111462722551
+gbdt_balanced,8.147135142631276,10.491170304799272

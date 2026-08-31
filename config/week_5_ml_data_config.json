@@ -1,0 +1,45 @@
+{
+  "target": "future_realized_vol_20",
+  "target_description": "Annualized realized volatility calculated from the next 20 trading days of log returns.",
+  "feature_columns": [
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "vix",
+    "treasury_10y",
+    "daily_return",
+    "log_return",
+    "intraday_return",
+    "high_low_range",
+    "volume_change",
+    "volume_ma_20",
+    "close_ma_20",
+    "close_ma_60",
+    "rolling_vol_20",
+    "rolling_vol_60",
+    "vix_change",
+    "vix_ma_20",
+    "treasury_10y_change",
+    "treasury_10y_momentum_20",
+    "jpm_vix_corr_20"
+  ],
+  "split_method": "chronological_70_15_15",
+  "train_rows": 1176,
+  "validation_rows": 252,
+  "test_rows": 253,
+  "train_date_range": [
+    "2018-03-29",
+    "2022-11-28"
+  ],
+  "validation_date_range": [
+    "2022-11-29",
+    "2023-11-29"
+  ],
+  "test_date_range": [
+    "2023-11-30",
+    "2024-12-02"
+  ],
+  "look_ahead_bias_control": "Rows are sorted chronologically and never randomly shuffled. The target uses future returns only as a label, not as a feature."
+}

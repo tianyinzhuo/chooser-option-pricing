@@ -1,0 +1,63 @@
+{
+  "label_type": "Heston Monte Carlo synthetic reference price",
+  "disclosure": "This target is a simulated reference price, not an actual OTC transaction price.",
+  "market_features": [
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "vix",
+    "treasury_10y",
+    "daily_return",
+    "log_return",
+    "intraday_return",
+    "high_low_range",
+    "volume_change",
+    "volume_ma_20",
+    "close_ma_20",
+    "close_ma_60",
+    "rolling_vol_20",
+    "rolling_vol_60",
+    "vix_change",
+    "vix_ma_20",
+    "treasury_10y_change",
+    "treasury_10y_momentum_20",
+    "jpm_vix_corr_20"
+  ],
+  "contract_features": [
+    "strike",
+    "moneyness",
+    "choice_time_years",
+    "maturity_years"
+  ],
+  "target_column": "heston_synthetic_price",
+  "label_simulation_paths": 2000,
+  "date_sampling_step_days": 30,
+  "moneyness_values": [
+    0.9,
+    1.0,
+    1.1
+  ],
+  "choice_time_values": [
+    0.25,
+    0.5
+  ],
+  "maturity_years": 1.0,
+  "split_method": "chronological_70_15_15_by_unique_date",
+  "train_rows": 240,
+  "validation_rows": 48,
+  "test_rows": 60,
+  "train_date_range": [
+    "2018-03-29",
+    "2022-11-18"
+  ],
+  "validation_date_range": [
+    "2023-01-04",
+    "2023-11-03"
+  ],
+  "test_date_range": [
+    "2023-12-18",
+    "2024-12-31"
+  ]
+}
