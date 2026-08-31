@@ -1,0 +1,34 @@
+{
+  "benchmark_name": "heston_monte_carlo_synthetic_reference",
+  "purpose": "Evaluate the BSM simple chooser model against a simulated stochastic-volatility reference benchmark. This is not actual OTC transaction data.",
+  "option_contract": {
+    "contract_type": "European simple chooser option",
+    "strike_rule": "at_the_money",
+    "choice_time_years": 0.5,
+    "maturity_years": 1.0,
+    "dividend_yield": 0.0
+  },
+  "heston_parameters": {
+    "kappa": 2.0,
+    "long_run_variance": 0.04,
+    "vol_of_vol": 0.5,
+    "rho": -0.6
+  },
+  "simulation": {
+    "num_paths": 10000,
+    "trading_days_per_year": 252,
+    "random_seed": 42,
+    "sampling_step_days": 60
+  },
+  "evaluation": {
+    "high_volatility_quantile": 0.75,
+    "volatility_feature": "rolling_vol_60",
+    "risk_free_rate_feature": "treasury_10y",
+    "spot_price_feature": "close"
+  },
+  "disclosure": [
+    "The Heston Monte Carlo price is a synthetic reference benchmark rather than a market transaction price.",
+    "The benchmark is used to test the impact of stochastic volatility on the constant-volatility BSM chooser model.",
+    "MAE and RMSE measure divergence from the simulated benchmark, not real-market pricing error."
+  ]
+}
