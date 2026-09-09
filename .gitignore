@@ -5,3 +5,4 @@ data/raw/
 data/processed/
 data/external/
 models/
+*.bak_week5_hyperparams

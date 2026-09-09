@@ -3,6 +3,7 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
+import sklearn
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
@@ -10,10 +11,13 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SPLIT_DIR = PROJECT_ROOT / "data" / "processed" / "ml_splits"
 CONFIG_PATH = PROJECT_ROOT / "config" / "week_5_ml_data_config.json"
+HYPERPARAMETER_CONFIG_PATH = (
+    PROJECT_ROOT / "config" / "week_5_model_hyperparameters.json"
+)
+
 MODEL_DIR = PROJECT_ROOT / "models"
 OUTPUT_DIR = PROJECT_ROOT / "outputs" / "week_5"
 
-RANDOM_SEED = 42
 
 
 def calculate_metrics(actual: pd.Series, predicted: pd.Series) -> dict:
@@ -34,6 +38,13 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     metadata = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    hyperparameters = json.loads(
+        HYPERPARAMETER_CONFIG_PATH.read_text(encoding="utf-8-sig")
+    )
+    training_defaults = hyperparameters["training_defaults"]
+    selection_metric = hyperparameters["volatility_random_forest"]["selection_metric"]
+    if selection_metric not in {"mae", "rmse"}:
+        raise ValueError("selection_metric must be 'mae' or 'rmse'.")
     feature_columns = metadata["feature_columns"]
     target_column = metadata["target"]
 
@@ -47,20 +58,15 @@ def main() -> None:
     x_validation = validation_data[feature_columns]
     y_validation = validation_data[target_column]
 
-    candidate_settings = [
-        {
-            "model_name": "rf_conservative",
-            "n_estimators": 300,
-            "max_depth": 6,
-            "min_samples_leaf": 5,
-        },
-        {
-            "model_name": "rf_balanced",
-            "n_estimators": 500,
-            "max_depth": 10,
-            "min_samples_leaf": 3,
-        },
-    ]
+    if hyperparameters["volatility_random_forest"]["target"] != target_column:
+        raise ValueError("Configured target does not match this training script.")
+    candidate_settings = hyperparameters["volatility_random_forest"]["candidates"]
+    if not candidate_settings or len({c["model_name"] for c in candidate_settings}) != len(candidate_settings):
+        raise ValueError("Candidates must be non-empty with unique model names.")
+    supported_keys = {"model_name", "n_estimators", "max_depth", "min_samples_leaf"}
+    for settings in candidate_settings:
+        if set(settings) != supported_keys:
+            raise ValueError(f"Candidate keys must contain exactly: {sorted(supported_keys)}")
 
     validation_results = []
     trained_models = {}
@@ -81,8 +87,8 @@ def main() -> None:
             n_estimators=settings["n_estimators"],
             max_depth=settings["max_depth"],
             min_samples_leaf=settings["min_samples_leaf"],
-            random_state=RANDOM_SEED,
-            n_jobs=-1,
+            random_state=training_defaults["random_seed"],
+            n_jobs=training_defaults["n_jobs"],
         )
 
         model.fit(x_train, y_train)
@@ -97,7 +103,7 @@ def main() -> None:
         )
         trained_models[settings["model_name"]] = model
 
-    validation_results_df = pd.DataFrame(validation_results).sort_values("rmse")
+    validation_results_df = pd.DataFrame(validation_results).sort_values(selection_metric, kind="stable")
     selected_name = validation_results_df.iloc[0]["model_name"]
 
     if selected_name.startswith("persistence_baseline"):
@@ -127,8 +133,8 @@ def main() -> None:
         n_estimators=selected_settings["n_estimators"],
         max_depth=selected_settings["max_depth"],
         min_samples_leaf=selected_settings["min_samples_leaf"],
-        random_state=RANDOM_SEED,
-        n_jobs=-1,
+        random_state=training_defaults["random_seed"],
+        n_jobs=training_defaults["n_jobs"],
     )
 
     final_model.fit(
@@ -169,12 +175,26 @@ def main() -> None:
     test_path = OUTPUT_DIR / "volatility_rf_test_metrics.csv"
     importance_path = OUTPUT_DIR / "volatility_rf_feature_importance.csv"
 
+    selected_record = {
+        "model_name": selected_name,
+        "selection_metric": selection_metric,
+        "selected_parameters": selected_settings,
+        "resolved_parameters": final_model.get_params(deep=False),
+        "sklearn_version": sklearn.__version__,
+        "configuration_snapshot": hyperparameters,
+    }
+    (OUTPUT_DIR / "volatility_rf_selected_hyperparameters.json").write_text(
+        json.dumps(selected_record, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
     joblib.dump(
         {
             "model": final_model,
             "feature_columns": feature_columns,
             "target_column": target_column,
             "selected_settings": selected_settings,
+            "hyperparameter_config": hyperparameters,
+            "sklearn_version": sklearn.__version__,
             "split_method": metadata["split_method"],
         },
         model_path,
