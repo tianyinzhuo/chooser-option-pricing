@@ -1,0 +1,97 @@
+{
+  "selection_metric": "rmse",
+  "target_column": "heston_price_to_spot",
+  "feature_columns": [
+    "daily_return",
+    "log_return",
+    "intraday_return",
+    "high_low_range",
+    "volume_change",
+    "volume_to_ma20_ratio",
+    "close_to_ma20_ratio",
+    "close_to_ma60_ratio",
+    "rolling_vol_20",
+    "rolling_vol_60",
+    "vix",
+    "vix_change",
+    "vix_ma_20",
+    "treasury_10y",
+    "treasury_10y_change",
+    "treasury_10y_momentum_20",
+    "jpm_vix_corr_20",
+    "moneyness",
+    "choice_time_years",
+    "maturity_years"
+  ],
+  "cv_method": {
+    "method": "grouped_expanding_window",
+    "group_column": "date",
+    "n_splits": 4,
+    "gap_groups": 0,
+    "description": "All six contracts from the same market date must remain in the same fold."
+  },
+  "selected_by_family": {
+    "ridge": {
+      "parameters": {
+        "alpha": 0.01
+      },
+      "cv_metrics": {
+        "mae": 2.195419605464603,
+        "rmse": 2.9394206680869317,
+        "r2": 0.5951391651914194
+      }
+    },
+    "random_forest": {
+      "parameters": {
+        "n_estimators": 800,
+        "min_samples_leaf": 1,
+        "max_features": 1.0,
+        "max_depth": 6
+      },
+      "cv_metrics": {
+        "mae": 3.0167159128455046,
+        "rmse": 4.429027096392295,
+        "r2": 0.1825096899218575
+      }
+    },
+    "gbdt": {
+      "parameters": {
+        "subsample": 0.8,
+        "n_estimators": 350,
+        "min_samples_leaf": 8,
+        "max_depth": 4,
+        "loss": "huber",
+        "learning_rate": 0.02
+      },
+      "cv_metrics": {
+        "mae": 2.779377039945469,
+        "rmse": 4.1219713867775685,
+        "r2": 0.3127206011057253
+      }
+    },
+    "mlp": {
+      "parameters": {
+        "solver": "lbfgs",
+        "max_iter": 3000,
+        "learning_rate_init": 0.003,
+        "hidden_layer_sizes": [
+          32
+        ],
+        "early_stopping": false,
+        "alpha": 0.01,
+        "activation": "relu"
+      },
+      "cv_metrics": {
+        "mae": 2.2564852997223537,
+        "rmse": 2.9700139477728476,
+        "r2": 0.5007399003187482
+      }
+    }
+  },
+  "sklearn_version": "1.7.2",
+  "disclosures": [
+    "Heston Monte Carlo prices are synthetic reference labels, not real OTC transaction premiums.",
+    "The existing Week 5 test period has already been inspected during model development, so Week 6 results remain exploratory rather than a pristine final holdout.",
+    "SHAP values describe the fitted model and must not be interpreted as causal effects."
+  ]
+}

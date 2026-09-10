@@ -1,0 +1,5 @@
+﻿fold,train_contracts,validation_contracts,train_unique_dates,validation_unique_dates,train_start,train_end,validation_start,validation_end
+1,72,54,12,9,2018-03-29,2019-07-23,2019-09-04,2020-08-17
+2,126,54,21,9,2018-03-29,2020-08-17,2020-09-29,2021-09-13
+3,180,54,30,9,2018-03-29,2021-09-13,2021-10-25,2022-10-07
+4,234,54,39,9,2018-03-29,2022-10-07,2022-11-18,2023-11-03

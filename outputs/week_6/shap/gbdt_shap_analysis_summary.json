@@ -1,0 +1,63 @@
+{
+  "model_name": "week_6_tuned_gbdt",
+  "model_family": "gbdt",
+  "explainer": "SHAP TreeExplainer",
+  "explained_target": "Normalized price predictions converted back to US dollars by multiplying SHAP components by each contract's spot price.",
+  "samples_explained": 60,
+  "top_ten_global_features": [
+    {
+      "feature": "rolling_vol_60",
+      "mean_absolute_shap_usd": 4.157243603361469
+    },
+    {
+      "feature": "moneyness",
+      "mean_absolute_shap_usd": 3.4499274536464384
+    },
+    {
+      "feature": "choice_time_years",
+      "mean_absolute_shap_usd": 1.3415846726441145
+    },
+    {
+      "feature": "treasury_10y",
+      "mean_absolute_shap_usd": 0.4127833743874231
+    },
+    {
+      "feature": "vix_ma_20",
+      "mean_absolute_shap_usd": 0.39417287974099313
+    },
+    {
+      "feature": "vix",
+      "mean_absolute_shap_usd": 0.15779005511927127
+    },
+    {
+      "feature": "volume_to_ma20_ratio",
+      "mean_absolute_shap_usd": 0.12724198680600723
+    },
+    {
+      "feature": "close_to_ma60_ratio",
+      "mean_absolute_shap_usd": 0.08087103997157329
+    },
+    {
+      "feature": "jpm_vix_corr_20",
+      "mean_absolute_shap_usd": 0.07505696766690446
+    },
+    {
+      "feature": "rolling_vol_20",
+      "mean_absolute_shap_usd": 0.04957126262666371
+    }
+  ],
+  "representative_contract": {
+    "row_position": 41,
+    "date": "2024-09-06",
+    "spot_price": 212.46001,
+    "strike": 233.706011,
+    "moneyness": 1.1,
+    "choice_time_years": 0.5,
+    "actual_heston_synthetic_price": 28.51128408008484,
+    "gbdt_predicted_price": 29.66369436313752,
+    "absolute_error": 1.152410283052678,
+    "shap_base_value_usd": 34.96703133333968
+  },
+  "interpretation_warning": "SHAP values explain the fitted model's prediction behavior. They are not estimates of causal effects.",
+  "target_disclosure": "The model target is a Heston Monte Carlo synthetic reference price, not a real OTC transaction premium."
+}

@@ -1,0 +1,231 @@
+{
+  "experiment_name": "week_6_model_training_tuning_and_comparison",
+  "random_seed": 42,
+  "n_jobs": -1,
+  "selection_metric": "rmse",
+  "report_metrics": [
+    "mae",
+    "rmse",
+    "r2"
+  ],
+  "cross_validation": {
+    "volatility": {
+      "method": "TimeSeriesSplit",
+      "n_splits": 5,
+      "gap_rows": 20,
+      "description": "The 20-row gap separates each training fold from the future 20-day volatility target window."
+    },
+    "pricing": {
+      "method": "grouped_expanding_window",
+      "group_column": "date",
+      "n_splits": 4,
+      "gap_groups": 0,
+      "description": "All six contracts from the same market date must remain in the same fold."
+    }
+  },
+  "volatility_route": {
+    "route_name": "route_a_ml_volatility_plus_bsm",
+    "model_family": "random_forest",
+    "target_column": "future_realized_vol_20",
+    "persistence_baseline_column": "rolling_vol_60",
+    "search_type": "randomized",
+    "n_iter": 30,
+    "parameter_distributions": {
+      "n_estimators": [
+        300,
+        500,
+        800
+      ],
+      "max_depth": [
+        4,
+        6,
+        8,
+        12,
+        null
+      ],
+      "min_samples_leaf": [
+        2,
+        5,
+        10
+      ],
+      "max_features": [
+        "sqrt",
+        0.7,
+        1.0
+      ]
+    }
+  },
+  "pricing_route": {
+    "route_name": "route_b_normalized_supervised_pricing",
+    "source_target_column": "heston_synthetic_price",
+    "normalized_target_definition": "heston_synthetic_price / close",
+    "restore_to_dollars": "normalized_prediction * close",
+    "group_column": "date",
+    "models": {
+      "ridge": {
+        "search_type": "grid",
+        "parameter_grid": {
+          "alpha": [
+            0.01,
+            0.1,
+            1.0,
+            10.0,
+            100.0
+          ]
+        }
+      },
+      "random_forest": {
+        "search_type": "randomized",
+        "n_iter": 30,
+        "parameter_distributions": {
+          "n_estimators": [
+            300,
+            500,
+            800
+          ],
+          "max_depth": [
+            4,
+            6,
+            8,
+            12,
+            null
+          ],
+          "min_samples_leaf": [
+            1,
+            2,
+            3,
+            5
+          ],
+          "max_features": [
+            "sqrt",
+            0.7,
+            1.0
+          ]
+        }
+      },
+      "gbdt": {
+        "search_type": "randomized",
+        "n_iter": 40,
+        "parameter_distributions": {
+          "n_estimators": [
+            200,
+            350,
+            500,
+            700
+          ],
+          "learning_rate": [
+            0.02,
+            0.04,
+            0.07,
+            0.1
+          ],
+          "max_depth": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "min_samples_leaf": [
+            2,
+            3,
+            5,
+            8
+          ],
+          "subsample": [
+            0.8,
+            1.0
+          ],
+          "loss": [
+            "huber"
+          ]
+        }
+      },
+      "mlp": {
+        "search_type": "randomized",
+        "n_iter": 20,
+        "parameter_distributions": {
+          "hidden_layer_sizes": [
+            [
+              16
+            ],
+            [
+              32
+            ],
+            [
+              64
+            ],
+            [
+              32,
+              16
+            ],
+            [
+              64,
+              32
+            ],
+            [
+              64,
+              32,
+              16
+            ]
+          ],
+          "alpha": [
+            0.0001,
+            0.001,
+            0.01,
+            0.1
+          ],
+          "learning_rate_init": [
+            0.0003,
+            0.001,
+            0.003
+          ],
+          "activation": [
+            "relu",
+            "tanh"
+          ],
+          "solver": [
+            "adam",
+            "lbfgs"
+          ],
+          "max_iter": [
+            3000
+          ],
+          "early_stopping": [
+            false
+          ]
+        }
+      }
+    }
+  },
+  "final_comparison": {
+    "approaches": [
+      "bsm_closed_form_baseline",
+      "route_a_ml_volatility_plus_bsm",
+      "ridge",
+      "random_forest",
+      "gbdt",
+      "mlp"
+    ],
+    "primary_metric": "rmse",
+    "secondary_metrics": [
+      "mae",
+      "r2"
+    ],
+    "winner_rule": "Select hyperparameters using pre-test cross-validation RMSE, then report the existing chronological test period once."
+  },
+  "interpretability": {
+    "method": "shap",
+    "preferred_explainer": "TreeExplainer",
+    "maximum_explanation_samples": 60,
+    "plots": [
+      "summary_bar",
+      "summary_beeswarm",
+      "waterfall"
+    ]
+  },
+  "disclosures": [
+    "Heston Monte Carlo prices are synthetic reference labels, not real OTC transaction premiums.",
+    "The existing Week 5 test period has already been inspected during model development, so Week 6 results remain exploratory rather than a pristine final holdout.",
+    "SHAP values describe the fitted model and must not be interpreted as causal effects."
+  ]
+}

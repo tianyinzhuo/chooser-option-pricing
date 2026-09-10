@@ -1,0 +1,68 @@
+{
+  "model_name": "week_6_tuned_volatility_random_forest",
+  "route_name": "route_a_ml_volatility_plus_bsm",
+  "selection_metric": "rmse",
+  "best_parameters": {
+    "n_estimators": 800,
+    "min_samples_leaf": 10,
+    "max_features": "sqrt",
+    "max_depth": 8
+  },
+  "best_cv_metrics": {
+    "mae": 0.19458981139439685,
+    "rmse": 0.24435698026710667,
+    "r2": -23.03274624830965
+  },
+  "test_metrics": {
+    "mae": 0.0658110639731615,
+    "rmse": 0.08864831380168126,
+    "r2": -0.00019558433854638402
+  },
+  "cv_method": {
+    "method": "TimeSeriesSplit",
+    "n_splits": 5,
+    "gap_rows": 20,
+    "description": "The 20-row gap separates each training fold from the future 20-day volatility target window."
+  },
+  "feature_columns": [
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "vix",
+    "treasury_10y",
+    "daily_return",
+    "log_return",
+    "intraday_return",
+    "high_low_range",
+    "volume_change",
+    "volume_ma_20",
+    "close_ma_20",
+    "close_ma_60",
+    "rolling_vol_20",
+    "rolling_vol_60",
+    "vix_change",
+    "vix_ma_20",
+    "treasury_10y_change",
+    "treasury_10y_momentum_20",
+    "jpm_vix_corr_20"
+  ],
+  "target_column": "future_realized_vol_20",
+  "pretest_rows": 1428,
+  "test_rows": 253,
+  "pretest_date_range": [
+    "2018-03-29",
+    "2023-11-29"
+  ],
+  "test_date_range": [
+    "2023-11-30",
+    "2024-12-02"
+  ],
+  "sklearn_version": "1.7.2",
+  "disclosures": [
+    "Heston Monte Carlo prices are synthetic reference labels, not real OTC transaction premiums.",
+    "The existing Week 5 test period has already been inspected during model development, so Week 6 results remain exploratory rather than a pristine final holdout.",
+    "SHAP values describe the fitted model and must not be interpreted as causal effects."
+  ]
+}

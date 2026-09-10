@@ -1,0 +1,20 @@
+{
+  "route_name": "route_a_ml_volatility_plus_bsm",
+  "volatility_model": "week_6_tuned_volatility_random_forest",
+  "volatility_target": "future_realized_vol_20",
+  "test_contracts": 60,
+  "test_unique_dates": 10,
+  "route_a_metrics": {
+    "mae": 2.9928935186671235,
+    "rmse": 3.726099781158183,
+    "r2": 0.826745849291685
+  },
+  "bsm_baseline_metrics": {
+    "mae": 3.65814449772991,
+    "rmse": 4.91111462722551,
+    "r2": 0.6990219471255862
+  },
+  "rmse_improvement_over_bsm_percent": 24.129244296152592,
+  "methodological_caveat": "The ML model predicts annualized volatility over the next 20 trading days, while the chooser contracts have a one-year maturity. Route A therefore treats the short-horizon forecast as a constant annualized BSM volatility and should be interpreted as an exploratory hybrid.",
+  "target_disclosure": "Heston Monte Carlo prices are synthetic reference labels, not real OTC transaction premiums."
+}
