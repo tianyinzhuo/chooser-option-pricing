@@ -1,0 +1,16 @@
+{
+  "comparison": "same GBDT parameters, with versus without lagged sentiment features",
+  "base_feature_count": 20,
+  "sentiment_feature_count": 10,
+  "extended_feature_count": 30,
+  "cv_rmse_improvement_percent": -1.9788975855387012,
+  "test_rmse_improvement_percent": -1.0685766935900622,
+  "test_mae_improvement_percent": 0.8342472581694828,
+  "sentiment_improved_cv_rmse": false,
+  "sentiment_improved_test_rmse": false,
+  "disclosures": [
+    "The target is a Heston Monte Carlo synthetic reference price, not an OTC premium.",
+    "The same fixed Week 6 GBDT hyperparameters are used for a controlled comparison.",
+    "The existing test period has already been inspected, so results are exploratory."
+  ]
+}

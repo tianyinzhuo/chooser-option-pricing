@@ -1,0 +1,64 @@
+{
+  "experiment_name": "week_7_extreme_scenario_analysis",
+  "model_path": "models/week_6/week_6_tuned_gbdt_pricing.joblib",
+  "test_data_path": "data/processed/ml_synthetic_price_splits/week_5_e2e_test.csv",
+  "output_directory": "outputs/week_7",
+  "feature_range_check": {
+    "enabled": true,
+    "reference_scope": "Week 5 train + validation contracts (pre-test only)",
+    "reference_data_paths": [
+      "data/processed/ml_synthetic_price_splits/week_5_e2e_train.csv",
+      "data/processed/ml_synthetic_price_splits/week_5_e2e_validation.csv"
+    ]
+  },
+  "scenarios": {
+    "baseline": {
+      "description": "不施加冲击，保留原始测试集数据"
+    },
+    "underlying_volatility_spike_50pct": {
+      "description": "JPM历史波动率提高50%",
+      "multiplier": 1.5,
+      "columns": [
+        "rolling_vol_20",
+        "rolling_vol_60"
+      ]
+    },
+    "vix_spike_50pct": {
+      "description": "VIX水平及20日均值提高50%",
+      "multiplier": 1.5,
+      "columns": [
+        "vix",
+        "vix_ma_20"
+      ]
+    },
+    "rate_hike_2_percentage_points": {
+      "description": "10年期美债收益率水平平行上移2个百分点（仅调整水平值；日变化与20日动量保持不变）",
+      "additive_shock": 2.0,
+      "columns": [
+        "treasury_10y"
+      ]
+    },
+    "combined_stress": {
+      "description": "历史波动率和VIX提高50%，同时10年期美债收益率水平平行上移2个百分点（日变化与20日动量保持不变）",
+      "volatility_multiplier": 1.5,
+      "rate_additive_shock": 2.0,
+      "rate_level_columns": [
+        "treasury_10y"
+      ]
+    }
+  },
+  "evaluation_metrics": [
+    "mean_price",
+    "median_price",
+    "mean_price_change",
+    "mean_percentage_change",
+    "maximum_absolute_price_change"
+  ],
+  "disclosures": [
+    "定价模型的监督标签是Heston蒙特卡洛合成参考价格，不是真实OTC成交权利金。",
+    "10年期国债利率字段使用百分数单位，因此水平平行上移2个百分点在数据中记为treasury_10y加2.0；treasury_10y_change与treasury_10y_momentum_20保持不变。",
+    "所有情景均相对于Week 5训练集与验证集组成的预测试集检查模型特征是否越界；测试集不参与范围边界计算。",
+    "特征越界表示模型正在外推，相关压力测试结果需要更谨慎地解释。",
+    "情景结果反映已训练GBDT模型的响应，不代表因果关系或未来真实市场表现。"
+  ]
+}

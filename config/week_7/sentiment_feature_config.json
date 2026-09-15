@@ -1,0 +1,32 @@
+{
+  "experiment_name": "week_7_leakage_safe_news_sentiment_features",
+  "source": "Alpha Vantage NEWS_SENTIMENT filtered for JPM",
+  "source_articles": 5443,
+  "mapped_articles": 5443,
+  "excluded_after_last_trading_date": 0,
+  "output_rows": 1701,
+  "output_date_range": [
+    "2018-03-29",
+    "2024-12-31"
+  ],
+  "trading_days_with_prior_news": 1517,
+  "sentiment_features": [
+    "news_available_lag1",
+    "news_article_count_lag1",
+    "news_sentiment_mean_lag1",
+    "news_sentiment_weighted_lag1",
+    "news_positive_share_lag1",
+    "news_negative_share_lag1",
+    "news_neutral_share_lag1",
+    "news_sentiment_ma_5",
+    "news_sentiment_ma_20",
+    "news_article_count_ma_5"
+  ],
+  "anti_leakage_rule": "Each article is assigned to the first JPM trading day strictly after its UTC publication date. Weekend and holiday news rolls forward.",
+  "missing_news_rule": "No-news trading days receive article_count=0, sentiment=0, and news_available_lag1=0.",
+  "disclosures": [
+    "Alpha Vantage sentiment is an external vendor score.",
+    "UTC calendar-day mapping is conservative and avoids same-day after-close leakage.",
+    "A zero score on no-news days means no observed JPM article, not proven neutral sentiment."
+  ]
+}
